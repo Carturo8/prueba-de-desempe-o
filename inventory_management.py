@@ -119,13 +119,15 @@ def add_product(product_name:str = "", product_price:float = 0.0, product_quanti
 
         # Check if the product already exists
         for name in inventory.keys():
-            if normalize(name) == normalize(product_name):
+            if normalize(product_name) == normalize(name):
                 print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
+                product_name = validate_product_name()
+                break
         #if normalize(product_name) in inventory.keys():
             #print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
-            else:
-                inventory[product_name] = (product_price, product_quantity)
-                print(f"""\033[92m\n➕ The product '{product_name}': (Price: ${product_price}, Quantity: {product_quantity} unit(s)) added successfully!\033[0m""")
+        else:
+            inventory[product_name] = (product_price, product_quantity)
+            print(f"""\033[92m\n➕ The product '{product_name}': (Price: ${product_price}, Quantity: {product_quantity} unit(s)) added successfully!\033[0m""")
 
         # Ask if the user wants to add another product
         print(f"""\033[93m\n➕ Add another product? 
@@ -137,8 +139,8 @@ def add_product(product_name:str = "", product_price:float = 0.0, product_quanti
             # Validate new product information
             product_name = validate_product_name()
             for name in inventory.keys():
-                if normalize(name) == normalize(product_name):
-                    print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
+                if normalize(product_name) == normalize(name):
+                    break
             else:
                 product_price = validate_product_price()
                 product_quantity = validate_product_quantity()
@@ -319,11 +321,12 @@ def main() -> None:
             product_price:float = 0.0
             product_quantity:int = 0
             for name in inventory.keys():
-                if normalize(name) == normalize(product_name):
-                    print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
-                else:
-                    product_price = validate_product_price()
-                    product_quantity = validate_product_quantity()
+                if normalize(product_name) == normalize(name):
+                    #print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
+                    break
+            else:
+                product_price = validate_product_price()
+                product_quantity = validate_product_quantity()
             add_product(product_name, product_price, product_quantity)
 
         elif option == "2":
