@@ -20,7 +20,6 @@ def validate_product_name(product_name:str = "") -> str:
     condition = True
     while condition:
         product_name = " ".join(input("\n📝 Enter the product name: ").split())
-        product_name = product_name.capitalize()
         if len(product_name) > 25:
             print("\033[91m❌ The product name must not exceed 25 characters.\033[0m")
         elif not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]+", product_name):
@@ -89,7 +88,7 @@ def validate_product_quantity(product_quantity:int = 0) -> int:
     return product_quantity
 
 
-def normalize(text:str = "") -> str:
+def normalize(text: str) -> str:
     """
     Function to normalize a string to remove accents and convert to lowercase.
     """
@@ -118,32 +117,25 @@ def add_product(product_name:str = "", product_price:float = 0.0, product_quanti
     while condition:
 
         # Check if the product already exists
-        for name in inventory.keys():
-            if normalize(product_name) == normalize(name):
-                print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
-                product_name = validate_product_name()
-                break
-        #if normalize(product_name) in inventory.keys():
-            #print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
+        if normalize(product_name) in inventory.keys():
+            print("\033[93m⚠️ The product already exists.\033[0m")
         else:
-            inventory[product_name] = (product_price, product_quantity)
-            print(f"""\033[92m\n➕ The product '{product_name}': (Price: ${product_price}, Quantity: {product_quantity} unit(s)) added successfully!\033[0m""")
+            inventory[normalize(product_name)] = (product_price, product_quantity)
+            print(f"\033[92m\n➕ The Product '{product_name.capitalize()}': ('Price': ${product_price}, 'Quantity': {product_quantity} unit(s)) added successfully!\033[0m")
 
         # Ask if the user wants to add another product
         print(f"""\033[93m\n➕ Add another product? 
-(Press 'y' to add more / any other key to return to the main menu): \033[0m""", end = "")
+(Press 'y' to add more / any other key to return to menu): \033[0m""", end = "")
 
         if input().strip().lower() != "y":
             condition = False
         else:
             # Validate new product information
             product_name = validate_product_name()
-            for name in inventory.keys():
-                if normalize(product_name) == normalize(name):
-                    break
-            else:
+            if normalize(product_name) not in inventory.keys():
                 product_price = validate_product_price()
                 product_quantity = validate_product_quantity()
+            else:
                 continue
 
 
@@ -166,35 +158,26 @@ def search_product(product_name:str = "") -> tuple[float, int]:
     while condition:
 
         # Check if the product exists in the inventory
-        if normalize(product_name) in normalize(inventory.keys()):
-            product_price, product_quantity = inventory[product_name]
+        if normalize(product_name) in inventory.keys():
+            product_price, product_quantity = inventory[normalize(product_name)]
             print(f"\033[32m🔍 Product found!\033[0m")
             print(f"""\033[92m-------------------------
-🛒 Name: {product_name}
+🛒 Name: {product_name.capitalize()}
 💰 Price: ${product_price}
 📦 Quantity available: {product_quantity}\033[0m""")
         else:
             print(f"\033[91m❌ The product '{product_name}' is not in the inventory.\033[0m")
 
-            # Ask if the user wants to add it
-            print(f"""\033[93m\n➕ Do you want to add it? (y/n):
-(Press 'y' to continue / any other key to return to the previous menu): \033[0m""", end = "")
-
-            if input().lower() == "y":
-                product_price = validate_product_price()
-                product_quantity = validate_product_quantity()
-                add_product(product_name, product_price, product_quantity)
-                break
-
         # Ask if the user wants to search for another product
         print(f"""\033[93m\n🔍 Search for another product? 
-(Press 'y' to continue / any other key to return to the main menu): \033[0m""", end = "")
+(Press 'y' to continue / any other key to return to menu): \033[0m""", end = "")
 
         if input().lower() != "y":
             condition = False
         else:
             # Validate a new product name
             product_name = validate_product_name()
+
     return product_price, product_quantity
 
 
@@ -217,13 +200,13 @@ def update_product_price(product_name:str = "", new_product_price:float = 0.0) -
     while condition:
 
         # Check if the product exists in the inventory
-        if product_name in inventory.keys():
-            old_product_price = inventory[product_name][0]
-            product_quantity = inventory[product_name][1]
-            inventory[product_name] = (new_product_price, product_quantity)
+        if normalize(product_name) in inventory.keys():
+            old_product_price = inventory[normalize(product_name)][0]
+            product_quantity = inventory[normalize(product_name)][1]
+            inventory[normalize(product_name)] = (new_product_price, product_quantity)
             print(f"\033[32m💲 Product price updated!\033[0m")
             print(f"""\033[92m-------------------------
-🛒 Name: {product_name}
+🛒 Name: {product_name.capitalize()}
 💸 Old price: ${old_product_price}
 💰 New price: ${new_product_price}
 📦 Quantity available: {product_quantity}\033[0m""")
@@ -239,7 +222,7 @@ def update_product_price(product_name:str = "", new_product_price:float = 0.0) -
         else:
             # Validate new product information
             product_name = validate_product_name()
-            if product_name in inventory.keys():
+            if normalize(product_name) in inventory.keys():
                 new_product_price = validate_product_price()
             else:
                 continue
@@ -263,15 +246,15 @@ def delete_product(product_name:str = "") -> None:
     while condition:
 
         # Check if the product exists in the inventory
-        if product_name in inventory.keys():
+        if normalize(product_name) in inventory.keys():
             print("\033[93m\n👉 Do you really want to permanently delete this product? (y/n): \033[0m", end = "")
             if input().lower() == "y":
-                del inventory[product_name]
-                print(f"\033[92m🗑️ The product '{product_name}' has been permanently deleted from the inventory.\033[0m")
+                del inventory[normalize(product_name)]
+                print(f"\033[92m🗑️ The product '{product_name.capitalize()}' has been permanently deleted from the inventory.\033[0m")
             else:
-                print(f"\033[34m👉 The product '{product_name}' was not deleted.")
+                print(f"\033[34m👉 The product '{product_name.capitalize()}' was not deleted.")
         else:
-            print(f"\033[91m❌ The product '{product_name}' is not in the inventory.\033[0m")
+            print(f"\033[91m❌ The product '{product_name.capitalize()}' is not in the inventory.\033[0m")
 
         # Ask if the user wants to delete another product
         print(f"""\033[93m\n🗑️ Delete another product? 
@@ -318,13 +301,9 @@ def main() -> None:
         if option == "1":
             print("\033[96m\n➕ -------------------- ADD PRODUCT --------------------\033[0m")
             product_name = validate_product_name()
-            product_price:float = 0.0
-            product_quantity:int = 0
-            for name in inventory.keys():
-                if normalize(product_name) == normalize(name):
-                    #print("\033[93m⚠️ The product already exists. Try a different name.\033[0m")
-                    break
-            else:
+            product_price: float = 0.0
+            product_quantity: int = 0
+            if normalize(product_name) not in inventory.keys():
                 product_price = validate_product_price()
                 product_quantity = validate_product_quantity()
             add_product(product_name, product_price, product_quantity)
@@ -338,7 +317,7 @@ def main() -> None:
             print("\033[96m\n💲 ------------------ UPDATE PRICE -------------------\033[0m")
             product_name = validate_product_name()
             new_product_price:float = 0.0
-            if product_name in inventory.keys():
+            if normalize(product_name) in inventory.keys():
                 new_product_price = validate_product_price()
                 update_product_price(product_name, new_product_price)
             else:
@@ -361,7 +340,7 @@ def main() -> None:
                 print("-" * 65)
                 for product, details in inventory.items():
                     price, quantity = details
-                    print(f"\033[92m{product:<25}  $ {price:<15}  {quantity:<15}")
+                    print(f"\033[92m{product.capitalize():<25}  $ {price:<15}  {quantity:<15}")
             else:
                 print("\033[93m\n⚠️ The inventory is empty.\033[0m")
 
